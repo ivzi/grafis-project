@@ -1,17 +1,4 @@
-/*
- * GLUT Shapes Demo
- *
- * Written by Nigel Stewart November 2003
- *
- * This program is test harness for the sphere, cone
- * and torus shapes in GLUT.
- *
- * Spinning wireframe and smooth shaded shapes are
- * displayed until the ESC or q key is pressed.  The
- * number of geometry stacks and slices can be adjusted
- * using the + and - keys.
- */
-#include<windows.h>
+#include <windows.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -19,42 +6,67 @@
 #endif
 
 #include <stdlib.h>
+#include "math.h"
+#include <iostream>
+using namespace std;
 
-    float Cx = 0.0f, Cy = 5.0f, Cz = 10.0f;
-    float Lx = 0.0f, Ly = 1.0f, Lz = 0.0f;
+bool power = false;
+float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 
-/* GLUT callback Handlers */
+void keyFunction(unsigned char key, int x, int y){
+    switch(key){
+        case 73: // I
+            power = true;
+        break;
+        case 79: // O
+            while (posY > 0) {
+                keyFunction('L', 0, 0);
+            }
 
-float view_rotx = 20.0f, view_roty = 30.0f;
-int oldMouseX, oldMouseY;
-
-void initGL(){
-    glShadeModel(GL_FLAT);
-    float ambient[] = {1.0f,1.0f,1.0f,1.0f};
-    float diffuse[] = {1.0f,1.0f,1.0f,1.0f};
-    float specular[] = {0.2f,1.0f,0.2f,1.0f};
-    float position[] = {20.0f,30.0f,20.0f,0.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-
-    float mambient[] ={0.1745f, 0.01175f, 0.01175f, 0.55f};
-    float mdiffuse[] ={0.61424f, 0.04136f, 0.04136f, 0.55f };
-    float mspecular[] ={0.727811f, 0.626959f, 0.626959f, 0.55f };
-    float mshine =76.8f;
-
-    glMaterialfv(GL_FRONT,GL_AMBIENT,mambient);
-    glMaterialfv(GL_FRONT,GL_DIFFUSE,mdiffuse);
-    glMaterialfv(GL_FRONT,GL_SPECULAR,mspecular);
-    glMaterialf (GL_FRONT,GL_SHININESS,mshine);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_NORMALIZE);
+            power = false;
+        break;
+        case 75: // K
+            if (power == true)
+                posY += 0.2f;
+        break;
+        case 76: // L
+            if (power == true)
+                posY -= 0.2f;
+        break;
+        case 87: // W
+            if (power == true)
+                posZ -= 0.2f;
+        break;
+        case 83: // S
+            if (power == true)
+                posZ += 0.2f;
+        break;
+        case 65: // A
+            if (power == true)
+                posX -= 0.2f;
+        break;
+        case 68: // D
+            if (power == true)
+                posX += 0.2f;
+        break;
+    }
 }
 
-void Drone(float radius, float length){
+void initGL()
+{
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glShadeModel(GL_SMOOTH);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+}
+
+float deg2Rad (float sudut) {
+	return sudut * (22/7) / 180;
+}
+
+void Tube(float radius, float length){
     float BODY_RADIUS=radius;
     float BODY_LENGTH=length;
     int SLICES=50;
@@ -66,150 +78,131 @@ void Drone(float radius, float length){
     gluDisk(q, 0.0f, BODY_RADIUS, SLICES, STACKS); //lingkaran untuk tutup bawah
 }
 
-void display(){
+void balingBaling()
+{
+	glBegin(GL_TRIANGLES);
+	glVertex3f(0, 0, 0);
+	glVertex3f(1, 0, 0.5);
+	glVertex3f(1, 0, -0.5);
+	glVertex3f(0, 0, 0);
+	glVertex3f(-1, 0, 0.5);
+	glVertex3f(-1, 0, -0.5);
+	glEnd();
+}
+
+GLfloat angle = 0.0f;
+void display()
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(Cx,Cy,Cz, // eye pos
-	Lx,Ly,Lz, // look at
-	0,1,0); // up
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
 	glPushMatrix();
-	glRotatef(90,1,0,0);
-	Drone(1.2f, 0.5f);
+	glTranslatef(posX,posY,posZ);
+
+    // MAIN BODY
+	glPushMatrix();
+	glTranslatef(0, -2, -12);
+    glRotatef(90,1,0,0);
+	glColor3f(1,0,0);
+	Tube(1.2f, 0.5f);
 	glPopMatrix();
+
+	// ROTOR PLATE
+	for (int a=0; a<4; a++) {
+		glPushMatrix();
+	}
+	for (int x=-3; x<=3; x+=6) {
+		for (int z=-10; z>=-14; z-=4) {
+			glTranslatef(x, -2, z);
+			glRotatef(90,1,0,0);
+			Tube(0.7f, 0.5f);
+			glPopMatrix();
+		}
+	}
+
+	// SKELETON
 	glPushMatrix();
-	glTranslatef(2.0f,0.0f,2.0f);
-	glRotatef(90,1,0,0);
-	Drone(0.5f, 0.5f);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-2.0f,0.0f,2.0f);
-	glRotatef(90,1,0,0);
-	Drone(0.5f, 0.5f);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-2.0f,0.0f,-2.0f);
-	glRotatef(90,1,0,0);
-	Drone(0.5f, 0.5f);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(2.0f,0.0f,-2.0f);
-	glRotatef(90,1,0,0);
-	Drone(0.5f, 0.5f);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(0.8f,-0.2f,0.8f);
-	glRotatef(45,0,1,0);
-	Drone(0.1f, 1.2f);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-0.8f,-0.2f,0.8f);
+	glTranslatef(2.5f,-2.25f,-14.0f);
 	glRotatef(-45,0,1,0);
-	Drone(0.1f, 1.2f);
+	glColor3f(1,1,0);
+	Tube(0.1f, 2.0f);
 	glPopMatrix();
+
 	glPushMatrix();
-	glTranslatef(-0.8f,-0.2f,-0.8f);
-	glRotatef(-135,0,1,0);
-	Drone(0.1f, 1.2f);
+	glTranslatef(-2.5f,-2.25f,-14.0f);
+	glRotatef(45,0,1,0);
+	glColor3f(1,1,0);
+	Tube(0.1f, 2.0f);
 	glPopMatrix();
+
 	glPushMatrix();
-	glTranslatef(0.8f,-0.2f,-0.8f);
+	glTranslatef(-2.5f,-2.25f,-10.0f);
 	glRotatef(135,0,1,0);
-	Drone(0.1f, 1.2f);
+	glColor3f(1,1,0);
+	Tube(0.1f, 2.0f);
 	glPopMatrix();
-	glFlush();
+
+	glPushMatrix();
+	glTranslatef(2.5f,-2.25f,-10.0f);
+	glRotatef(-135,0,1,0);
+	glColor3f(1,1,0);
+	Tube(0.1f, 2.0f);
+	glPopMatrix();
+
+	// ROTOR
+	for (int i=0; i<4; i++) {
+		glPushMatrix();
+	}
+	glColor3f(1,1,0);
+	for (int x=-3; x<=3; x+=6) {
+		for (int z=-10; z>=-14; z-=4) {
+			glPopMatrix();
+			glTranslatef(x, -1.9, z);
+			if (power){
+				glRotatef(angle, 0, 1, 0);
+				angle += 5;
+			} else {
+				glRotatef(angle, 0, 1, 0);
+                angle += 0;
+			}
+			balingBaling();
+		}
+	}
+
+	glPopMatrix();
 	glutSwapBuffers();
 }
 
-void timer(int value){
+void timer(int value)
+{
 	glutPostRedisplay();
 	glutTimerFunc(15, timer, 0);
 }
 
-void reshape(GLsizei width, GLsizei height){
-	if (height == 0) height = 1;
+void reshape(GLsizei width, GLsizei height)
+{
+	if (height == 0)
+		height = 1;
 	GLfloat aspect = (GLfloat)width / (GLfloat)height;
-	glViewport(30, 6, width, height);
+	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0f, aspect, 1.0f, 20.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gluPerspective(45.0f, aspect, 0.1f, 100.0f);
 }
 
-void mouseControl(int button, int state, int x, int y){
-	oldMouseX = x;
-	oldMouseY = y;
-}
-
-void mouseMotion(int x, int y){
-	int getX = x;
-	int getY = y;
-	float thetaY = 360.0f*(getX - oldMouseX)/640;
-	float thetaX = 360.0f*(getY - oldMouseY)/480;
-	oldMouseX = getX;
-	oldMouseY = getY;
-	view_rotx += thetaX;
-	view_roty += thetaY;
-}
-
-void keyFunction(unsigned char key, int x, int y){
-    // Agar fungsi ini bekerja, pastikan CapsLock menyala
-    switch(key){
-        case 87: // huruf W
-            Cz += 1;
-            Lz += 1;
-            break;
-        case 65: // huruf A
-            Cx -= 1;
-            Lx -= 1;
-            break;
-        case 83: // huruf S
-            Cz -= 1;
-            Lz -= 1;
-            break;
-        case 68: // huruf D
-            Cx += 1;
-            Lx += 1;
-            break;
-        case 73: // huruf I
-            break;
-        case 79: // huruf O
-            break;
-        case 86: // huruf V
-            break;
-    }
-}
-
-void keyControl(int k, int x, int y){
-    switch(k){
-        case GLUT_KEY_UP: // tombol panah atas
-            Cy += 1;
-            Ly += 1;
-            break;
-        case GLUT_KEY_DOWN: // tombol panah bawah
-            Cy -= 1;
-            Ly -= 1;
-            break;
-    }
-}
-
-/* Program entry point */
-
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(640, 480);
 	glutInitWindowPosition(50, 50);
-	glutCreateWindow("3d-control");
+	glutCreateWindow("3d-animation");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	initGL();
-	glutSpecialFunc(keyControl);
-    glutKeyboardFunc(keyFunction);
-	glutMouseFunc(mouseControl);
-	glutMotionFunc(mouseMotion);
 	glutTimerFunc(0, timer, 0);
+	glutKeyboardFunc(keyFunction);
 	glutMainLoop();
 	return 0;
 }

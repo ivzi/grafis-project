@@ -82,7 +82,7 @@
 1548158450 c:\mingw\include\msvcrtver.h
 	<_mingw.h>
 
-1551713584 c:\mingw\include\features.h
+1551506368 c:\mingw\include\features.h
 
 1548158450 c:\mingw\include\strings.h
 	<_mingw.h>
@@ -339,7 +339,7 @@
 1548158464 c:\mingw\include\oleidl.h
 	<objfwd.h>
 
-976641772 c:\mingw\include\gl\glut.h
+976692172 c:\mingw\include\gl\glut.h
 	<windows.h>
 	<GL/gl.h>
 	<GL/glu.h>
@@ -349,4 +349,10 @@
 1548158464 c:\mingw\include\gl\glu.h
 	<stddef.h>
 	<GL/gl.h>
+
+1561096410 source:d:\kuliah\smt 6\grafis-project\project\main.cpp
+	<windows.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<stdlib.h>
 
