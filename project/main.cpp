@@ -10,7 +10,7 @@
 #include <iostream>
 using namespace std;
 
-bool power = false;
+bool power = false, isOff = false;
 float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 
 void keyFunction(unsigned char key, int x, int y){
@@ -19,18 +19,14 @@ void keyFunction(unsigned char key, int x, int y){
             power = true;
         break;
         case 79: // O
-            while (posY > 0) {
-                keyFunction('L', 0, 0);
-            }
-
-            power = false;
+            isOff = true;
         break;
         case 75: // K
             if (power == true)
                 posY += 0.2f;
         break;
         case 76: // L
-            if (power == true)
+            if (power == true && posY > 0)
                 posY -= 0.2f;
         break;
         case 87: // W
@@ -90,6 +86,16 @@ void balingBaling()
 	glEnd();
 }
 
+void falling()
+{
+    keyFunction('L',0,0);
+    // STOP ENGINE
+    if (posY < 0){
+        power = false;
+        isOff = false;
+    }
+}
+
 GLfloat angle = 0.0f;
 void display()
 {
@@ -107,6 +113,11 @@ void display()
 	glColor3f(1,0,0);
 	Tube(1.2f, 0.5f);
 	glPopMatrix();
+
+	// FALLING EVENT
+	if (isOff){
+	    falling();
+	}
 
 	// ROTOR PLATE
 	for (int a=0; a<4; a++) {

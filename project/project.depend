@@ -350,9 +350,14 @@
 	<stddef.h>
 	<GL/gl.h>
 
-1561096410 source:d:\kuliah\smt 6\grafis-project\project\main.cpp
+1562316537 source:d:\kuliah\smt 6\grafis-project\project\main.cpp
 	<windows.h>
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<stdlib.h>
+	"math.h"
+	<iostream>
+
+1548158450 c:\mingw\include\math.h
+	<_mingw.h>
 
