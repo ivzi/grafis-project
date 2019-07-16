@@ -86,6 +86,37 @@ void balingBaling()
 	glEnd();
 }
 
+void Soccer_Field (void)
+{
+    float x, y, ang, radius = 0.1;     // Not sure what the radius of the center circle should be?
+
+    static float RAD_DEG = 57.296;
+
+    glBegin (GL_QUADS);
+       glColor3f  (0.20, 0.60, 0.20);                           // GreenYard
+       glVertex2f (-1.10, -0.90);
+       glVertex2f (2.50, -0.90);
+       glVertex2f (2.50, 1.8);
+       glVertex2f (-1.10, 1.8);
+       glColor3f  (1.0, 1.0, 1.0);
+    glEnd ();
+
+    glColor3f (0.0, 0.0, 0.0);                                  // Change color to black
+
+    glBegin (GL_LINES);
+       glVertex2f (0.70, -0.90);
+       glVertex2f (0.70, 1.8);        // Mid Line
+    glEnd ();
+
+    //glBegin (GL_LINE_LOOP);                                     // Circle at center of field
+       //for (ang = 0.0; ang < 360.0; ang += 10.0)  {
+          //x = radius * cos(ang/RAD_DEG) + 1.0;
+          //y = radius * sin(ang/RAD_DEG) + 0.5;
+          //glVertex2f (x/2.0, y);
+       //}
+    //glEnd ();
+}
+
 void falling()
 {
     keyFunction('L',0,0);
@@ -182,6 +213,12 @@ void display()
 	}
 
 	glPopMatrix();
+
+	glPushMatrix();
+    glTranslated(-0.8,-1.45,-3);
+    glRotated(-90,1,0,0);
+    Soccer_Field();
+    glPopMatrix();
 	glutSwapBuffers();
 }
 
