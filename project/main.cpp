@@ -10,17 +10,17 @@
 #include <iostream>
 using namespace std;
 
-float Cx = 0.0f, Cy = 0.0f, Cz = 0.0f;
-float Lx = 0.0f, Ly = 0.5f, Lz = -20.0f;
+float Cx = 0.0f, Cy = -0.2f, Cz = 0.0f;
+float Lx = 0.0f, Ly = -0.2f, Lz = -12.0f;
+float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
+int camera_type = 0;
 float angle_depanBelakang = 0.0f;
 float angle_depanBelakang2 = 0.0f;
 float angle_samping = 0.0f;
 float angle_samping2 = 0.0f;
 float angle_vertikal = 0.0f;
 float angle_vertikal2 = 0.0f;
-bool ori = true, kamera = false, kamera1 = false, kamera2 = false, kamera3 = false, kamera4 = false, kamera5 = false;
 bool power = false, isOff = false;
-float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 
 float toRadians(float angle){
     return angle * M_PI / 180;
@@ -85,28 +85,44 @@ void keyFunction(unsigned char key, int x, int y){
             isOff = true;
         break;
         case 81: // Q
-            if (power == true)
+            if (power == true){
                 posY += 0.2f;
+            }
+
         break;
         case 69: // E
-            if (power == true && posY > 0)
+            if (power == true && posY > 0){
                 posY -= 0.2f;
+            }
         break;
         case 87: // W
-            if (power == true)
+            if (power == true){
                 posZ -= 0.2f;
+            }
         break;
         case 83: // S
-            if (power == true)
+            if (power == true){
                 posZ += 0.2f;
+            }
         break;
         case 65: // A
-            if (power == true)
+            if (power == true){
                 posX -= 0.2f;
+                if (camera_type == 1){
+                    Cx -= 0.2f;
+                    Lx -= 0.2f;
+                }
+            }
         break;
         case 68: // D
-            if (power == true)
+            if (power == true){
                 posX += 0.2f;
+                if (camera_type == 1){
+                    Cx += 0.2f;
+                    Lx += 0.2f;
+                }
+            }
+
         break;
         case 90: // Z
         angle_depanBelakang += 15.0f;
@@ -173,6 +189,18 @@ void Tube(float radius, float length){
     gluDisk(q, 0.0f, BODY_RADIUS, SLICES, STACKS); //lingkaran untuk tutup bawah
 }
 
+void Field(float radius, float length){
+    float BODY_RADIUS=radius;
+    float BODY_LENGTH=length;
+    int SLICES = 4;
+    int STACKS = 4;
+    GLUquadric *q= gluNewQuadric();
+    gluCylinder(q, BODY_RADIUS, BODY_RADIUS, BODY_LENGTH, SLICES, STACKS);
+    gluDisk(q, 0.0f, BODY_RADIUS, SLICES, STACKS);
+    glTranslatef(0.0f, 0.0f, BODY_LENGTH);
+    gluDisk(q, 0.0f, BODY_RADIUS, SLICES, STACKS);
+}
+
 void balingBaling()
 {
 	glBegin(GL_TRIANGLES);
@@ -185,34 +213,11 @@ void balingBaling()
 	glEnd();
 }
 
-void Soccer_Field (void)
-{
-    float x, y, ang, radius = 0.1;
-
-    static float RAD_DEG = 57.296;
-
-    glBegin (GL_QUADS);
-       glColor3f  (0.20, 0.60, 0.20);
-       glVertex2f (-1.10, -0.90);
-       glVertex2f (2.50, -0.90);
-       glVertex2f (2.50, 1.8);
-       glVertex2f (-1.10, 1.8);
-       glColor3f  (1.0, 1.0, 1.0);
-    glEnd ();
-
-    glColor3f (0.0, 0.0, 0.0);
-
-    glBegin (GL_LINES);
-       glVertex2f (0.70, -0.90);
-       glVertex2f (0.70, 1.8);
-    glEnd ();
-}
-
 void falling()
 {
     keyFunction('E',0,0);
     // STOP ENGINE
-    if (posY < 0){
+    if (posY <= 0){
         power = false;
         isOff = false;
     }
@@ -229,6 +234,17 @@ void display()
     gluLookAt(Cx, Cy, Cz,
     Lx, Ly, Lz,
     vertikal.x, vertikal.y, vertikal.z);
+
+    // field
+	glPushMatrix();
+	glTranslatef(0, -2.6f, -12);
+    glRotatef(90,1,0,0);
+    glRotatef(45,0,0,1);
+	glColor3f(0,1,0);
+	Field(40.0f, 0.5f);
+	glPopMatrix();
+
+    // MAIN GROUP
     glPushMatrix();
 	glTranslatef(posX,posY,posZ);
 
@@ -310,9 +326,6 @@ void display()
 	glPopMatrix();
 
 	glPushMatrix();
-    glTranslated(-0.8,-1.45,-3);
-    glRotated(-90,1,0,0);
-    Soccer_Field();
     glPopMatrix();
 	glutSwapBuffers();
 }
