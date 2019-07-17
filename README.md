@@ -7,10 +7,10 @@ Judul : Drone
 3. Muhamad Irfan Zidni - 161111067
 
 # Key Control :
-1. I - On
-2. O - Off
-3. K - Up
-4. L - Down
+1. Enter - On
+2. R - Off
+3. Q - Up
+4. E - Down
 5. W - Forward
 6. A - Left
 7. S - Backward
