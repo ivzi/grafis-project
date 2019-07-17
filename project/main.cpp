@@ -10,22 +10,85 @@
 #include <iostream>
 using namespace std;
 
+float Cx = 0.0f, Cy = 0.0f, Cz = 0.0f;
+float Lx = 0.0f, Ly = 0.5f, Lz = -20.0f;
+float angle_depanBelakang = 0.0f;
+float angle_depanBelakang2 = 0.0f;
+float angle_samping = 0.0f;
+float angle_samping2 = 0.0f;
+float angle_vertikal = 0.0f;
+float angle_vertikal2 = 0.0f;
+bool ori = true, kamera = false, kamera1 = false, kamera2 = false, kamera3 = false, kamera4 = false, kamera5 = false;
 bool power = false, isOff = false;
 float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 
+float toRadians(float angle){
+    return angle * M_PI / 180;
+}
+
+class Vector{
+    public:
+    float x, y, z;
+    void set_values (float startX, float startY, float startZ){
+    x = startX;
+    y = startY;
+    z = startZ;
+}
+void vectorRotation(Vector refs, float angle){
+    Vector temp = refs;
+    float magnitude = sqrt(pow(temp.x, 2) + pow(temp.y, 2) + pow(temp.z, 2));
+    temp.x = temp.x / magnitude;
+    temp.y = temp.y / magnitude;
+    temp.z = temp.z / magnitude;
+    float dot_product = (x * temp.x)+(y * temp.y)+(z * temp.z);
+    float cross_product_x = (y * temp.z) - (temp.z * z);
+    float cross_product_y = -((x * temp.z) - (z * temp.x));
+    float cross_product_z = (x * temp.y) - (y * temp.x);
+    float last_factor_rodrigues = 1.0f - cos(toRadians(fmod(angle, 360.0f)));
+    x = (x * cos(toRadians(fmod(angle, 360.0f)))) + (cross_product_x * sin(toRadians(fmod(angle, 360.0f)))) + (dot_product * last_factor_rodrigues * x);
+    y = (y * cos(toRadians(fmod(angle, 360.0f)))) + (cross_product_y * sin(toRadians(fmod(angle, 360.0f)))) + (dot_product * last_factor_rodrigues * y);
+    z = (z * cos(toRadians(fmod(angle, 360.0f)))) + (cross_product_z * sin(toRadians(fmod(angle, 360.0f)))) + (dot_product * last_factor_rodrigues * z);
+    }
+};
+Vector depanBelakang, samping, vertikal;
+
+void cameraRotation(Vector refer, double angle){
+    float M = sqrt(pow(refer.x, 2) + pow(refer.y, 2) + pow(refer.z, 2));
+    float Up_x1 = refer.x / M;
+    float Up_y1 = refer.y / M;
+    float Up_z1 = refer.z / M;
+    float VLx = Lx - Cx;
+    float VLy = Ly - Cy;
+    float VLz = Lz - Cz;
+    float dot_product = (VLx * Up_x1) + (VLy * Up_y1) + (VLz * Up_z1);
+    float cross_product_x = (Up_y1 * VLz) - (VLy * Up_z1);
+    float cross_product_y = -((Up_x1 * VLz) - (Up_z1 * VLx));
+    float cross_product_z = (Up_x1 * VLy) - (Up_y1 * VLx);
+    float last_factor_rodrigues = 1.0f - cos(toRadians(angle));
+    float Lx1 = (VLx * cos(toRadians(angle))) + (cross_product_x * sin(toRadians
+    (angle))) + (dot_product * last_factor_rodrigues * VLx);
+    float Ly1 = (VLy * cos(toRadians(angle))) + (cross_product_y * sin(toRadians
+    (angle))) + (dot_product * last_factor_rodrigues * VLy);
+    float Lz1 = (VLz * cos(toRadians(angle))) + (cross_product_z * sin(toRadians
+    (angle))) + (dot_product * last_factor_rodrigues * VLz);
+    Lx = Lx1+Cx;
+    Ly = Ly1+Cy;
+    Lz = Lz1+Cz;
+}
+
 void keyFunction(unsigned char key, int x, int y){
     switch(key){
-        case 73: // I
+        case 13: // Enter
             power = true;
         break;
-        case 79: // O
+        case 82: // R
             isOff = true;
         break;
-        case 75: // K
+        case 81: // Q
             if (power == true)
                 posY += 0.2f;
         break;
-        case 76: // L
+        case 69: // E
             if (power == true && posY > 0)
                 posY -= 0.2f;
         break;
@@ -45,21 +108,57 @@ void keyFunction(unsigned char key, int x, int y){
             if (power == true)
                 posX += 0.2f;
         break;
+        case 90: // Z
+        angle_depanBelakang += 15.0f;
+        samping.vectorRotation(depanBelakang, angle_depanBelakang - angle_depanBelakang2);
+        vertikal.vectorRotation(depanBelakang, angle_depanBelakang - angle_depanBelakang2);
+        angle_depanBelakang2 = angle_depanBelakang;
+        break;
+        case 88: // X
+            angle_depanBelakang -= 15.0f;
+            samping.vectorRotation(depanBelakang, angle_depanBelakang - angle_depanBelakang2);
+            vertikal.vectorRotation(depanBelakang, angle_depanBelakang - angle_depanBelakang2);
+            angle_depanBelakang2 = angle_depanBelakang;
+        break;
+        case 74: // J
+            angle_vertikal += 5.0f;
+            samping.vectorRotation(vertikal, angle_vertikal - angle_vertikal2);
+            depanBelakang.vectorRotation(vertikal, angle_vertikal - angle_vertikal2);
+            cameraRotation(vertikal, angle_vertikal - angle_vertikal2);
+            angle_vertikal2 = angle_vertikal;
+        break;
+        case 76: // L
+            angle_vertikal -= 5.0f;
+            samping.vectorRotation(vertikal, angle_vertikal - angle_vertikal2);
+            depanBelakang.vectorRotation(vertikal, angle_vertikal - angle_vertikal2);
+            cameraRotation(vertikal, angle_vertikal - angle_vertikal2);
+            angle_vertikal2 = angle_vertikal;
+        break;
+        case 73: // I
+            angle_samping -= 5.0f;
+            depanBelakang.vectorRotation(samping, angle_samping - angle_samping2);
+            cameraRotation(samping, angle_samping - angle_samping2);
+            angle_samping2 = angle_samping;
+        break;
+        case 75: // K
+            angle_samping += 5.0f;
+            depanBelakang.vectorRotation(samping, angle_samping - angle_samping2);
+            cameraRotation(samping, angle_samping - angle_samping2);
+            angle_samping2 = angle_samping;
+        break;
     }
 }
 
-void initGL()
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+void initGL(){
+    depanBelakang.set_values(0.0f, 0.0f, -1.0f);
+    samping.set_values(1.0f, 0.0f, 0.0f);
+    vertikal.set_values(0.0f, 1.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-}
-
-float deg2Rad (float sudut) {
-	return sudut * (22/7) / 180;
 }
 
 void Tube(float radius, float length){
@@ -88,12 +187,12 @@ void balingBaling()
 
 void Soccer_Field (void)
 {
-    float x, y, ang, radius = 0.1;     // Not sure what the radius of the center circle should be?
+    float x, y, ang, radius = 0.1;
 
     static float RAD_DEG = 57.296;
 
     glBegin (GL_QUADS);
-       glColor3f  (0.20, 0.60, 0.20);                           // GreenYard
+       glColor3f  (0.20, 0.60, 0.20);
        glVertex2f (-1.10, -0.90);
        glVertex2f (2.50, -0.90);
        glVertex2f (2.50, 1.8);
@@ -101,25 +200,17 @@ void Soccer_Field (void)
        glColor3f  (1.0, 1.0, 1.0);
     glEnd ();
 
-    glColor3f (0.0, 0.0, 0.0);                                  // Change color to black
+    glColor3f (0.0, 0.0, 0.0);
 
     glBegin (GL_LINES);
        glVertex2f (0.70, -0.90);
-       glVertex2f (0.70, 1.8);        // Mid Line
+       glVertex2f (0.70, 1.8);
     glEnd ();
-
-    //glBegin (GL_LINE_LOOP);                                     // Circle at center of field
-       //for (ang = 0.0; ang < 360.0; ang += 10.0)  {
-          //x = radius * cos(ang/RAD_DEG) + 1.0;
-          //y = radius * sin(ang/RAD_DEG) + 0.5;
-          //glVertex2f (x/2.0, y);
-       //}
-    //glEnd ();
 }
 
 void falling()
 {
-    keyFunction('L',0,0);
+    keyFunction('E',0,0);
     // STOP ENGINE
     if (posY < 0){
         power = false;
@@ -132,9 +223,13 @@ void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
-	glPushMatrix();
+    glLoadIdentity();
+
+    gluLookAt(Cx, Cy, Cz,
+    Lx, Ly, Lz,
+    vertikal.x, vertikal.y, vertikal.z);
+    glPushMatrix();
 	glTranslatef(posX,posY,posZ);
 
     // MAIN BODY
@@ -230,8 +325,7 @@ void timer(int value)
 
 void reshape(GLsizei width, GLsizei height)
 {
-	if (height == 0)
-		height = 1;
+	if (height == 0) height = 1;
 	GLfloat aspect = (GLfloat)width / (GLfloat)height;
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
