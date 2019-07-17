@@ -20,6 +20,7 @@ float angle_samping = 0.0f;
 float angle_samping2 = 0.0f;
 float angle_vertikal = 0.0f;
 float angle_vertikal2 = 0.0f;
+bool ori = true, kamera = false, kamera1 = false, kamera2 = false, kamera3 = false, kamera4 = false, kamera5 = false;
 bool power = false, isOff = false;
 
 float toRadians(float angle){
@@ -84,25 +85,57 @@ void keyFunction(unsigned char key, int x, int y){
         case 82: // R
             isOff = true;
         break;
+        case 67: // C = Change Camera
+            if (power == true){
+                if (camera_type == 0)
+                {
+                    camera_type = 1;
+                    Cx = Lx = posX;
+                    Cy = Ly = posY;
+                    Cz = posZ;
+                    Lz = -15 - posZ;
+                } else {
+                    camera_type = 0;
+                    Cx = 0.0f, Cy = -0.2f, Cz = 0.0f;
+                    Lx = 0.0f, Ly = -0.2f, Lz = -15.0f;
+                }
+            }
+        break;
         case 81: // Q
             if (power == true){
                 posY += 0.2f;
+                if (camera_type == 1){
+                    Cy += 0.2f;
+                    Ly += 0.2f;
+                }
             }
 
         break;
         case 69: // E
             if (power == true && posY > 0){
                 posY -= 0.2f;
+                if (camera_type == 1){
+                    Cy -= 0.2f;
+                    Ly -= 0.2f;
+                }
             }
         break;
         case 87: // W
             if (power == true){
                 posZ -= 0.2f;
+//                if (camera_type == 1){
+//                    Cz -= 0.2f;
+//                    Lz -= 0.2f;
+//                }
             }
         break;
         case 83: // S
             if (power == true){
                 posZ += 0.2f;
+//                if (camera_type == 1){
+//                    Cz += 0.2f;
+//                    Lz += 0.2f;
+//                }
             }
         break;
         case 65: // A
@@ -237,7 +270,7 @@ void display()
 
     // field
 	glPushMatrix();
-	glTranslatef(0, -2.6f, -12);
+	glTranslatef(0, -2.7f, -12);
     glRotatef(90,1,0,0);
     glRotatef(45,0,0,1);
 	glColor3f(0,1,0);
@@ -352,7 +385,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(640, 480);
 	glutInitWindowPosition(50, 50);
-	glutCreateWindow("3d-animation");
+	glutCreateWindow("Drone Simulator");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	initGL();
